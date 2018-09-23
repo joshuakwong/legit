@@ -5,7 +5,7 @@ use strict;
 
 my $numarg = $#ARGV+1;
 if ($numarg == 0){
-    print "error, insufficient arguments\n";
+    print "legit.pl: error: insufficient arguments\n";
     exit;
 }
 
@@ -13,6 +13,20 @@ if ($numarg == 0){
 if ($ARGV[0] eq "init"){
     initdir();
 }
+
+elsif ($ARGV[0] eq "add"){
+    add();
+}
+
+else {
+    print "legit.pl: error: not recognized command\n";
+    exit;
+}
+
+sub add{
+    return;
+}
+
 
 
 
