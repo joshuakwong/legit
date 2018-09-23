@@ -24,7 +24,16 @@ else {
 }
 
 sub add{
-    return;
+    if (!-d ".legit"){ #legit not initialized
+        print "legit.pl: error: .legit not yet initialized\n";
+        return;
+    }
+
+    open my $ind, ">>", ".legit/index" or die "fail to create file";
+
+
+
+    close $ind
 }
 
 
