@@ -5,19 +5,24 @@ use strict;
 require 'sub0.pl';
 
 my $numarg = $#ARGV+1;
+
 if ($numarg == 0){
     print "legit.pl: error: insufficient arguments\n";
     exit;
 }
 
-
-if ($ARGV[0] eq "init"){
+elsif ($ARGV[0] eq "init"){
     initdir();
 }
 
 elsif ($ARGV[0] eq "add"){
     shift @ARGV;
     add(@ARGV);
+}
+
+elsif ($ARGV[0] eq "commit"){
+    shift @ARGV;
+    commit(@ARGV);
 }
 
 elsif ($ARGV[0] eq "test"){
