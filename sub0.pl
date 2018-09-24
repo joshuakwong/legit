@@ -1,6 +1,6 @@
 # legit commit
 sub commit{
-    initcheck();
+    #initcheck();
     my (@args) = @_;
     # case if there are too much arguments to commit
     if ($#args+1 > 3){
@@ -32,9 +32,11 @@ sub commit{
         exit 1;
     }
 
-
-
-
+    if ($mPos == -1){
+        print "./legit.pl: error: invalid operation, message must be included\n";
+        print "usage: ./legit.pl commit [-a] -m \"message\"\n";
+        exit 1;
+    }
 
 
 
