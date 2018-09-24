@@ -2,6 +2,7 @@
 
 use warnings;
 use strict;
+require 'sub0.pl';
 
 my $numarg = $#ARGV+1;
 if ($numarg == 0){
@@ -15,37 +16,21 @@ if ($ARGV[0] eq "init"){
 }
 
 elsif ($ARGV[0] eq "add"){
-    add();
+    shift @ARGV;
+    add(@ARGV);
 }
 
+elsif ($ARGV[0] eq "test"){
+    print "@ARGV\n";
+    print "\n";
+    shift @ARGV;
+    print "@ARGV\n";
+    
+
+}
 else {
     print "legit.pl: error: not recognized command\n";
     exit;
 }
 
-sub add{
-    if (!-d ".legit"){ #legit not initialized
-        print "legit.pl: error: .legit not yet initialized\n";
-        return;
-    }
 
-    open my $ind, ">>", ".legit/index" or die "fail to create file";
-
-
-
-    close $ind
-}
-
-
-
-
-
-sub initdir{
-    if (-d ".legit"){
-        print "legit.pl: error: .legit already exists\n";
-    }
-    else {
-        mkdir(".legit", 0700);
-        print "Initialized empty legit repository in .legit\n";
-    }
-}
