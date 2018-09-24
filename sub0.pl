@@ -25,10 +25,23 @@ sub add{
     }
 
     foreach my $file (@files){
-        if (!-e $file){
+        # catch files not in the current directory
+        if ($file =~ /\//){
+            print "only file of the current directory can be added\n";
+            next;
+        }
+        # catch files not named right#
+        if ($file !~ /^[a-zA-Z0-9]/){
+            print "filename $file is not valid\n";
+            next;
+        }
+        # catch files that doesn't exist in directory
+        if (!-e $file ){
             print "file $file does not exist in directory\n";
             next;
         }
+ 
+        # copy files
         use File::Copy;
         copy("$file", ".legit/index/$file") or die "copy fail";
         print "Backup of '$file' saved '.legit/index/$file'\n";        

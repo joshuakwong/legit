@@ -25,9 +25,10 @@ elsif ($ARGV[0] eq "test"){
     print "\n";
     shift @ARGV;
     print "@ARGV\n";
-    
-
 }
+
+
+
 else {
     print "legit.pl: error: not recognized command\n";
     exit;
