@@ -21,8 +21,8 @@ sub legitlog{
             print "$line";    
         }
         close $f;
+        print "\n";
     }
-    print "\n";
 }
 
 
@@ -125,20 +125,26 @@ sub commit{
     
     else {
         foreach my $item (@filename){
+            # file appear in both index and latest commit
             if (-e ".legit/index/$item" && -e ".legit/commit/$latestCommit/$item") {
+                # file are the same, copy from the latest commit to new commit
                 if (compare(".legit/commit/$latestCommit/$item", ".legit/index/$item") == 0){
-                    next;
+                    mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
+                    copy(".legit/commit/$latestCommit/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
                 }
                 else {
+                    #file are not the same, copy from index
                     print "files are not\n";
                     print "$commitFileName\n";
                     mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
-                    copy("$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                    copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
                 }
             }
+            # file only appear in index but not latest commit
             elsif (-e ".legit/index/$item" && !-e ".legit/commit/$latestCommit/$item") {
                 mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
-                copy("$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                #copy("$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
             }
         }
     }
@@ -148,6 +154,7 @@ sub commit{
         my $commentDir = ".legit/commit/$commitFileName/comment";
         open my $commentFile, ">", $commentDir, or die "fail to write comments\n";
         print $commentFile $commitComment;
+        print "Committed as commit $commitFileName\n";
         close $commentFile;
     }
 
