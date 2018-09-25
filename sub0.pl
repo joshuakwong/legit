@@ -1,3 +1,28 @@
+# legit log
+sub legitlog{
+    #initcheck();
+    if (!-e ".legit/commit"){
+        print "./legit.pl: error: no commit history.\n";
+        exit 1;
+    }
+    
+    # find the latest commit, set the boolean value if this is the first commit
+    my @commitHist = glob(".legit/commit/*");
+    if (!@commitHist){
+        print "./legit.pl: error: no commit history.\n";
+        exit 1;
+    }
+
+    print @commitHist;
+
+
+
+
+
+
+}
+
+
 # legit commit
 sub commit{
     #initcheck();
@@ -37,6 +62,8 @@ sub commit{
         exit 1;
     }
 
+    my $commitComment = $args[$mPos+1];
+
     # check if commit directory exists or not
     if (!-e ".legit/commit"){
         mkdir (".legit/commit", 0700);
@@ -61,7 +88,6 @@ sub commit{
         our $commitFileName = $1+1;
         $commitFileName = "commit$commitFileName";
     }
-    print "commit filename = $commitFileName\n";
 
     #use File::Compare;
     my @filename = glob (".legit/index/*");
@@ -69,25 +95,57 @@ sub commit{
         print "./legit.pl: error: there is nothing in index, use ./legit.pl add <filename> <filename>\n";
         exit 1;
     }
-    @filename2 = glob (".legit/commit/$latestCommit/*") if ($firstCommit == 0);
-    push(@filename, @filename2);
+
+    # do not push filename from 2nd list if already exist in first list
+    if ($firstCommit == 0){
+        @filename2 = glob (".legit/commit/$latestCommit/*"); 
+        foreach my $commitItem (@filename2){
+            $commitItem =~ s/.legit\/commit\/$latestCommit\///;
+            push(@filename, $commitItem) unless grep{$_ ne $commitItem} @filename;
+        }
+    }
     foreach my $item (@filename){
         $item =~ s/.*\///;
     }
     
-    #use File::Compare;
+
+    use File::Copy;
+    use File::Compare;
     if ($firstCommit == 1){
-        mkdir (".legit/commit/$commitFileName", 0700);
-        use File::Copy;
+        mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
         foreach my $item (@filename){
             copy("$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
             print "commited '$item' as .legit/commit/$commitFileName/$item\n";        
         }
     }
     
+    else {
+        foreach my $item (@filename){
+            if (-e ".legit/index/$item" && -e ".legit/commit/$latestCommit/$item") {
+                if (compare(".legit/commit/$latestCommit/$item", ".legit/index/$item") == 0){
+                    next;
+                }
+                else {
+                    print "files are not\n";
+                    print "$commitFileName\n";
+                    mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
+                    copy("$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                }
+            }
+            elsif (-e ".legit/index/$item" && !-e ".legit/commit/$latestCommit/$item") {
+                mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
+                copy("$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+            }
+        }
+    }
 
-
-
+    #add comment
+    if (-d ".legit/commit/$commitFileName"){
+        my $commentDir = ".legit/commit/$commitFileName/comment";
+        open my $commentFile, ">", $commentDir, or die "fail to write comments\n";
+        print $commentFile $commitComment;
+        close $commentFile;
+    }
 
 
 }
@@ -145,20 +203,5 @@ sub initcheck{
         exit 1;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 1;

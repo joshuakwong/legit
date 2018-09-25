@@ -25,6 +25,10 @@ elsif ($ARGV[0] eq "commit"){
     commit(@ARGV);
 }
 
+elsif ($ARGV[0] eq "log"){
+    legitlog();
+}
+
 elsif ($ARGV[0] eq "test"){
     print "@ARGV\n";
     print "\n";
