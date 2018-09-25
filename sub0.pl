@@ -15,9 +15,6 @@ sub commit{
         $aPos = $i if ($args[$i] eq "-a");
         $mPos = $i if ($args[$i] eq "-m");
     }
-    #print "aPos = $aPos\n";
-    #print "mPos = $mPos\n";
-    #print "$args[$mPos+1]\n";
 
     # case if -a flag is between -m and message
     if ($aPos == $mPos+1){
@@ -26,21 +23,68 @@ sub commit{
         exit 1;
     }
 
+    # case if message started with a dash#
     if ($args[$mPos+1] =~ /^-/){
         print "./legit.pl: error: invalid operation, message must not be started with a dash\n";
         print "usage: ./legit.pl commit [-a] -m \"message\"\n";
         exit 1;
     }
 
+    # case if -m does not exist
     if ($mPos == -1){
         print "./legit.pl: error: invalid operation, message must be included\n";
         print "usage: ./legit.pl commit [-a] -m \"message\"\n";
         exit 1;
     }
 
+    # check if commit directory exists or not
+    if (!-e ".legit/commit"){
+        mkdir (".legit/commit", 0700);
+    }
+    
+    # find the latest commit, set the boolean value if this is the first commit
+    my @commitHist = glob(".legit/commit/*");
+    foreach my $item (@commitHist){
+        $item =~ s/\.legit\/commit\///;
+    }
+    my $latestCommit = $commitHist[$#commitHist];
+    
+    # new commit file
+    if (!defined $latestCommit){
+        our $firstCommit = 1;
+        print "first commit\n";
+        our $commitFileName = "commit0";
+    }
+    else{
+        my $firstCommit = 0;
+        $latestCommit =~ /commit(\d+)/;
+        our $commitFileName = $1+1;
+        $commitFileName = "commit$commitFileName";
+    }
+    print "commit filename = $commitFileName\n";
 
-
-
+    #use File::Compare;
+    my @filename = glob (".legit/index/*");
+    if (!@filename){
+        print "./legit.pl: error: there is nothing in index, use ./legit.pl add <filename> <filename>\n";
+        exit 1;
+    }
+    @filename2 = glob (".legit/commit/$latestCommit/*") if ($firstCommit == 0);
+    push(@filename, @filename2);
+    foreach my $item (@filename){
+        $item =~ s/.*\///;
+    }
+    
+    #use File::Compare;
+    if ($firstCommit == 1){
+        mkdir (".legit/commit/$commitFileName", 0700);
+        use File::Copy;
+        foreach my $item (@filename){
+            copy("$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+            print "commited '$item' as .legit/commit/$commitFileName/$item\n";        
+        }
+    }
+    
 
 
 

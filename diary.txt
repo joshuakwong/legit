@@ -1,0 +1,5 @@
+23/9/2018   21:20   22:20   coding          complete legit init
+23/9/2018   22:30   22:30   destroying      delete my assignment
+23/9/2018   22:40   00:00   coding          redo legi init, create git repo
+24/9/2018   10:40   12:00   coding          complete legit add
+24/9/2018   12:00   14:00   coding          add code fo legit commit
