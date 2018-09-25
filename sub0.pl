@@ -13,13 +13,16 @@ sub legitlog{
         exit 1;
     }
 
-    print @commitHist;
-
-
-
-
-
-
+    foreach $dir (@commitHist){
+        $dir =~ /(\d+)/;
+        open my $f, "<", "$dir/comment" or die "fail to read comment";
+        print "$1 ";
+        while (my $line = <$f>){
+            print "$line";    
+        }
+        close $f;
+    }
+    print "\n";
 }
 
 
@@ -41,6 +44,14 @@ sub commit{
         $mPos = $i if ($args[$i] eq "-m");
     }
 
+
+    # case if -m does not exist
+    if ($mPos == -1){
+        print "./legit.pl: error: invalid operation, message must be included\n";
+        print "usage: ./legit.pl commit [-a] -m \"message\"\n";
+        exit 1;
+    }
+
     # case if -a flag is between -m and message
     if ($aPos == $mPos+1){
         print "./legit.pl: error: invalid operation, -m flag must be followed by a message\n";
@@ -51,13 +62,6 @@ sub commit{
     # case if message started with a dash#
     if ($args[$mPos+1] =~ /^-/){
         print "./legit.pl: error: invalid operation, message must not be started with a dash\n";
-        print "usage: ./legit.pl commit [-a] -m \"message\"\n";
-        exit 1;
-    }
-
-    # case if -m does not exist
-    if ($mPos == -1){
-        print "./legit.pl: error: invalid operation, message must be included\n";
         print "usage: ./legit.pl commit [-a] -m \"message\"\n";
         exit 1;
     }
@@ -85,7 +89,7 @@ sub commit{
     else{
         my $firstCommit = 0;
         $latestCommit =~ /(\d+)/;
-        our $commitFileName = $1++;
+        our $commitFileName = $1+1;
         $commitFileName = "$commitFileName";
     }
 
