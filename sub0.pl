@@ -80,13 +80,13 @@ sub commit{
     if (!defined $latestCommit){
         our $firstCommit = 1;
         print "first commit\n";
-        our $commitFileName = "commit0";
+        our $commitFileName = "0";
     }
     else{
         my $firstCommit = 0;
-        $latestCommit =~ /commit(\d+)/;
-        our $commitFileName = $1+1;
-        $commitFileName = "commit$commitFileName";
+        $latestCommit =~ /(\d+)/;
+        our $commitFileName = $1++;
+        $commitFileName = "$commitFileName";
     }
 
     #use File::Compare;
