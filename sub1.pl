@@ -156,9 +156,25 @@ sub rm{
         push(@fileList, $arg) if ($arg !~ /^--/);
     }
 
+    if (!-d ".legit/commit"){
+        print "legit.pl: error: no previous commit history\n";
+        exit 1;
+    }
+    my @commitHist = glob (".legit/commit/*");
+    $latestCommit = pop(@commitHist);
+    $latestCommit =~ s/\.legit\/commit\///;
+    if (!defined $latestCommit){
+        print "legit.pl: error: no previous commit history\n";
+        exit 1;
+    }
+
     use File::Compare;
     foreach my $file (@fileList){
         if ($force == 0){
+            if (!-d ".legit/commit/$latestCommit/$file"){
+                print "legit.pl: error: can not open '$file'\n";
+                exit 1;
+            }
             # if curr dir != last commit
             
             # if index != last commit
