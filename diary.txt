@@ -3,3 +3,10 @@
 23/9/2018   22:40   00:00   coding          redo legi init, create git repo
 24/9/2018   10:40   12:00   coding          complete legit add
 24/9/2018   12:00   14:00   coding          add code fo legit commit
+25/9/2018   18:00   20:00   coding          add error checking code for legit commit
+25/9/2018   20:00   21:00   coding          change the naming convention for all variable names and function names
+26/9/2018   16:00   18:00   coding          add code for legit log
+26/9/2018   20:00   21:00   coding          add code for legit show
+26/9/2018   21:30   22:00   debugging       debug legit commit
+26/9/2018   22:00   23:00   debugging       run autotest on cse machine, update error messages
+26/9/2018   23:00   24:00   coding          passed all autotest, reorder code layout for subset 1
