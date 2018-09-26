@@ -89,10 +89,10 @@ sub commit{
 
     use File::Copy;
     use File::Compare;
+    # case if this is the first commit
     if ($firstCommit == 1){
         mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
         foreach my $item (@filename){
-            #copy("$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
             copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
         }
         print "Committed as commit 0\n";        
@@ -142,6 +142,43 @@ sub commit{
         close $commentFile;
     }
 }
+
+
+sub rm{
+    my @argv = @_;
+
+    my $force = 0;
+    my $cache = 0;
+    my @fileList;
+    foreach my $arg (@argv){
+        $force = 1 if ($arg =~ /--force/);
+        $cache = 1 if ($arg =~ /--cache/);
+        push(@fileList, $arg) if ($arg !~ /^--/);
+    }
+
+    use File::Compare;
+    foreach my $file (@fileList){
+        if ($force == 0){
+            # if curr dir != last commit
+            
+            # if index != last commit
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+}
+
 
 
 1;

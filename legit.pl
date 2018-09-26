@@ -36,14 +36,10 @@ elsif ($ARGV[0] eq "show"){
     show(@ARGV);
 }
 
-elsif ($ARGV[0] eq "test"){
-    print "@ARGV\n";
-    print "\n";
+elsif ($ARGV[0] eq "rm"){
     shift @ARGV;
-    print "@ARGV\n";
+    rm(@ARGV);
 }
-
-
 
 else {
     print "legit.pl: error: not recognized command\n";
