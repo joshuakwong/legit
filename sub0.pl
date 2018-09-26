@@ -11,16 +11,13 @@ sub show{
     }
 
     $arg = $args[0];
-    if ($arg =~ /(\d+):(\w+)/){
-        my $commitNum = $1;
-        my $filename = $2;
-        #print "$1\n";
-        #print "$2\n";
+    if ($arg =~ /^(\d+):(.+)$/){
+        our $commitNum = $1;
+        our $filename = $2;
     }
 
-    elsif ($arg =~ /:(\w+)/){
-        my $filename = $1;
-        #print "$1\n";
+    elsif ($arg =~ /^:(.+)$/){
+        our $filename = $1;
     }
     
     else{
@@ -29,9 +26,33 @@ sub show{
         exit 1;
     }
     
+    # commitNumber not supplied, get file from index
+    if (!defined $commitNum){
+        if (!-e ".legit/index/$filename"){
+            print "./legit.pl: error: supplied filename cannot be found\n";
+            exit 1;
+        }
+        open my $f, "<", ".legit/index/$filename" or print "fuck, file cannot be opened";
 
+        while (my $line = <$f>){
+            print $line;
+        }
+        close $f;
+    }
+    
+    else {
+        if (! -e ".legit/commit/$commitNum/$filename"){
+            print ".legit/commit/$commitNum/$filename\n";
+            print "./legit.pl: error: supplied filename cannot be found in commit $commitNum\n";
+            exit 1;
+        }
+        open my $f, "<", ".legit/commit/$commitNum/$filename" or print "fuck, file cannot be opened";
 
-
+        while (my $line = <$f>){
+            print $line;
+        }
+        close $f;
+    }
 
 
 }
@@ -94,7 +115,7 @@ sub commit{
     # new commit file
     if (!defined $latestCommit){
         our $firstCommit = 1;
-        print "first commit\n";
+        #print "first commit\n";
         our $commitFileName = "0";
     }
     else{
@@ -145,8 +166,6 @@ sub commit{
                 }
                 else {
                     #file are not the same, copy from index
-                    print "files are not\n";
-                    print "$commitFileName\n";
                     mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
                     copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
                 }
@@ -155,7 +174,6 @@ sub commit{
             elsif (-e ".legit/index/$item" && !-e ".legit/commit/$latestCommit/$item") {
                 mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
                 copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
-                #copy("$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
             }
         }
     }
@@ -165,7 +183,6 @@ sub commit{
         my $commentDir = ".legit/commit/$commitFileName/comment";
         open my $commentFile, ">", $commentDir, or die "fail to write comments\n";
         print $commentFile $commitComment;
-        print "Committed as commit $commitFileName\n";
         close $commentFile;
     }
 
@@ -213,7 +230,7 @@ sub add{
         # copy files
         use File::Copy;
         copy("$file", ".legit/index/$file") or die "copy fail";
-        print "Backup of '$file' saved '.legit/index/$file'\n";        
+        #print "Backup of '$file' saved '.legit/index/$file'\n";        
     }
 }
 
