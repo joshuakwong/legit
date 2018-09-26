@@ -1,5 +1,3 @@
-
-
 # legit commit
 sub commit{
     #initcheck();
@@ -53,10 +51,11 @@ sub commit{
     }
     my $latestCommit = $commitHist[$#commitHist];
     
-    # new commit file
+    # declare the commit file name,
+    # if it is the first commit, assign it to "0"
+    # else, assign it to latest commit +1#
     if (!defined $latestCommit){
         our $firstCommit = 1;
-        #print "first commit\n";
         our $commitFileName = "0";
     }
     else{
@@ -66,14 +65,16 @@ sub commit{
         $commitFileName = "$commitFileName";
     }
 
-    #use File::Compare;
+    # check if there are files in .legit/index
     my @filename = glob (".legit/index/*");
     if (!@filename){
         print "legit.pl: error: there is nothing in index, use ./legit.pl add <filename> <filename>\n";
         exit 1;
     }
 
+    # add files from commit to list of files,
     # do not push filename from 2nd list if already exist in first list
+    # remove all directory characters except the filename itself
     if ($firstCommit == 0){
         @filename2 = glob (".legit/commit/$latestCommit/*"); 
         foreach my $commitItem (@filename2){
@@ -105,8 +106,6 @@ sub commit{
             if (-e ".legit/index/$item" && -e ".legit/commit/$latestCommit/$item") {
                 # file are the same, copy from the latest commit to new commit
                 if (compare(".legit/commit/$latestCommit/$item", ".legit/index/$item") == 0){
-                    #mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
-                    #copy(".legit/commit/$latestCommit/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
                     push (@sameFiles, "$item");
                 }
                 else {
