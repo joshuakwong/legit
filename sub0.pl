@@ -5,7 +5,7 @@ sub show{
 
     #print $args[0];
     if ($#args != 0){
-        print "./legit.pl: error: too much arguments\n";
+        print "legit.pl: error: too much arguments\n";
         print "usage: ./legit.pl show [commitNumber]:<filename>\n";
         exit 1;
     }
@@ -21,7 +21,7 @@ sub show{
     }
     
     else{
-        print "./legit.pl: error: invlid arguments\n";
+        print "legit.pl: error: invlid arguments\n";
         print "usage: ./legit.pl show [commitNumber]:<filename>\n";
         exit 1;
     }
@@ -29,7 +29,7 @@ sub show{
     # commitNumber not supplied, get file from index
     if (!defined $commitNum){
         if (!-e ".legit/index/$filename"){
-            print "./legit.pl: error: supplied filename cannot be found\n";
+            print "legit.pl: error: '$filename' not found in index\n";
             exit 1;
         }
         open my $f, "<", ".legit/index/$filename" or print "fuck, file cannot be opened";
@@ -40,10 +40,14 @@ sub show{
         close $f;
     }
     
+    elsif (!-d ".legit/commit/$commitNum"){
+        print "legit.pl: error: unknown commit '$commitNum'\n";
+        exit 1;
+    }
+
     else {
         if (! -e ".legit/commit/$commitNum/$filename"){
-            print ".legit/commit/$commitNum/$filename\n";
-            print "./legit.pl: error: supplied filename cannot be found in commit $commitNum\n";
+            print "legit.pl: error: '$filename' not found in commit $commitNum\n";
             exit 1;
         }
         open my $f, "<", ".legit/commit/$commitNum/$filename" or print "fuck, file cannot be opened";
@@ -53,8 +57,6 @@ sub show{
         }
         close $f;
     }
-
-
 }
 
 
@@ -64,7 +66,7 @@ sub commit{
     my (@args) = @_;
     # case if there are too much arguments to commit
     if ($#args+1 > 3){
-        print "./legit.pl: error: too much arguments\n";
+        print "legit.pl: error: too much arguments\n";
         print "usage: ./legit.pl commit [-a] -m \"message\"\n";
         exit 1;
     }
@@ -76,24 +78,23 @@ sub commit{
         $mPos = $i if ($args[$i] eq "-m");
     }
 
-
     # case if -m does not exist
     if ($mPos == -1){
-        print "./legit.pl: error: invalid operation, message must be included\n";
+        print "legit.pl: error: invalid operation, message must be included\n";
         print "usage: ./legit.pl commit [-a] -m \"message\"\n";
         exit 1;
     }
 
     # case if -a flag is between -m and message
     if ($aPos == $mPos+1){
-        print "./legit.pl: error: invalid operation, -m flag must be followed by a message\n";
+        print "legit.pl: error: invalid operation, -m flag must be followed by a message\n";
         print "usage: ./legit.pl commit [-a] -m \"message\"\n";
         exit 1;
     }
 
     # case if message started with a dash#
     if ($args[$mPos+1] =~ /^-/){
-        print "./legit.pl: error: invalid operation, message must not be started with a dash\n";
+        print "legit.pl: error: invalid operation, message must not be started with a dash\n";
         print "usage: ./legit.pl commit [-a] -m \"message\"\n";
         exit 1;
     }
@@ -128,7 +129,7 @@ sub commit{
     #use File::Compare;
     my @filename = glob (".legit/index/*");
     if (!@filename){
-        print "./legit.pl: error: there is nothing in index, use ./legit.pl add <filename> <filename>\n";
+        print "legit.pl: error: there is nothing in index, use ./legit.pl add <filename> <filename>\n";
         exit 1;
     }
 
@@ -150,9 +151,10 @@ sub commit{
     if ($firstCommit == 1){
         mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
         foreach my $item (@filename){
-            copy("$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
-            print "commited '$item' as .legit/commit/$commitFileName/$item\n";        
+            #copy("$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+            copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
         }
+        print "Committed as commit 0\n";        
     }
     
     else {
@@ -176,6 +178,7 @@ sub commit{
                 copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
             }
         }
+            print "Committed as commit $commitFileName\n";        
     }
 
     #add comment
@@ -223,7 +226,7 @@ sub add{
         }
         # catch files that doesn't exist in directory
         if (!-e $file ){
-            print "file $file does not exist in directory\n";
+            print "legit.pl: error: can not open '$file'\n";
             next;
         }
  
@@ -238,7 +241,7 @@ sub add{
 sub initcheck{
     #legit not initialized
     if (!-d ".legit"){ 
-        print "legit.pl: error: .legit not yet initialized\n";
+        print "legit.pl: error: no .legit directory containing legit repository exists\n";
         exit 1;
     }
 }
@@ -247,18 +250,18 @@ sub initcheck{
 sub legitlog{
     #initcheck();
     if (!-e ".legit/commit"){
-        print "./legit.pl: error: no commit history.\n";
+        print "legit.pl: error: no commit history.\n";
         exit 1;
     }
     
     # find the latest commit, set the boolean value if this is the first commit
     my @commitHist = glob(".legit/commit/*");
     if (!@commitHist){
-        print "./legit.pl: error: no commit history.\n";
+        print "legit.pl: error: no commit history.\n";
         exit 1;
     }
 
-    foreach $dir (@commitHist){
+    foreach $dir (reverse @commitHist){
         $dir =~ /(\d+)/;
         open my $f, "<", "$dir/comment" or die "fail to read comment";
         print "$1 ";
