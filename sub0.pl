@@ -1,28 +1,39 @@
-# legit log
-sub legitlog{
+# legit show
+sub show{
     #initcheck();
-    if (!-e ".legit/commit"){
-        print "./legit.pl: error: no commit history.\n";
-        exit 1;
-    }
-    
-    # find the latest commit, set the boolean value if this is the first commit
-    my @commitHist = glob(".legit/commit/*");
-    if (!@commitHist){
-        print "./legit.pl: error: no commit history.\n";
+    my (@args) = @_;   
+
+    #print $args[0];
+    if ($#args != 0){
+        print "./legit.pl: error: too much arguments\n";
+        print "usage: ./legit.pl show [commitNumber]:<filename>\n";
         exit 1;
     }
 
-    foreach $dir (@commitHist){
-        $dir =~ /(\d+)/;
-        open my $f, "<", "$dir/comment" or die "fail to read comment";
-        print "$1 ";
-        while (my $line = <$f>){
-            print "$line";    
-        }
-        close $f;
-        print "\n";
+    $arg = $args[0];
+    if ($arg =~ /(\d+):(\w+)/){
+        my $commitNum = $1;
+        my $filename = $2;
+        #print "$1\n";
+        #print "$2\n";
     }
+
+    elsif ($arg =~ /:(\w+)/){
+        my $filename = $1;
+        #print "$1\n";
+    }
+    
+    else{
+        print "./legit.pl: error: invlid arguments\n";
+        print "usage: ./legit.pl show [commitNumber]:<filename>\n";
+        exit 1;
+    }
+    
+
+
+
+
+
 }
 
 
@@ -215,4 +226,30 @@ sub initcheck{
     }
 }
 
+# legit log
+sub legitlog{
+    #initcheck();
+    if (!-e ".legit/commit"){
+        print "./legit.pl: error: no commit history.\n";
+        exit 1;
+    }
+    
+    # find the latest commit, set the boolean value if this is the first commit
+    my @commitHist = glob(".legit/commit/*");
+    if (!@commitHist){
+        print "./legit.pl: error: no commit history.\n";
+        exit 1;
+    }
+
+    foreach $dir (@commitHist){
+        $dir =~ /(\d+)/;
+        open my $f, "<", "$dir/comment" or die "fail to read comment";
+        print "$1 ";
+        while (my $line = <$f>){
+            print "$line";    
+        }
+        close $f;
+        print "\n";
+    }
+}
 1;
