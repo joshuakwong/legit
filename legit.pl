@@ -3,6 +3,8 @@
 use warnings;
 use strict;
 require 'sub0.pl';
+require 'sub1.pl';
+
 
 my $numarg = $#ARGV+1;
 
