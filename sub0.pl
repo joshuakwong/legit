@@ -143,18 +143,22 @@ sub commit{
     }
     
     else {
+        my $allSame = 1;
+        my @sameFiles;
         foreach my $item (@filename){
             # file appear in both index and latest commit
             if (-e ".legit/index/$item" && -e ".legit/commit/$latestCommit/$item") {
                 # file are the same, copy from the latest commit to new commit
                 if (compare(".legit/commit/$latestCommit/$item", ".legit/index/$item") == 0){
-                    mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
-                    copy(".legit/commit/$latestCommit/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                    #mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
+                    #copy(".legit/commit/$latestCommit/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                    push (@sameFiles, "$item");
                 }
                 else {
                     #file are not the same, copy from index
                     mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
                     copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                    $allSame = 0;
                 }
             }
             # file only appear in index but not latest commit
@@ -163,7 +167,17 @@ sub commit{
                 copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
             }
         }
+
+        if ($allSame == 0){
+            #copy the rest
+            foreach my $item (@sameFiles){
+                copy(".legit/commit/$latestCommit/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+            } 
             print "Committed as commit $commitFileName\n";        
+        }
+        else {
+            print "nothing to commit\n";
+        }
     }
 
     #add comment
