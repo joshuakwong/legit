@@ -170,18 +170,45 @@ sub rm{
 
     use File::Compare;
     foreach my $file (@fileList){
+        # if latest commit does not have that file
+        if (!-e ".legit/commit/$latestCommit/$file" && $force == 0){
+            print "legit.pl: error: can not open '$file' from commit $latestCommit\n";
+            exit 1;
+        }
+        if (!-e ".legit/index/$file" && $force == 0){
+            print "legit.pl: error: can not open '$file' from index\n";
+            exit 1;
+        }
+        if (!-e "$file" && $cache == 0){
+            print "legit.pl: error: can not open '$file' from current directory\n";
+            exit 1;
+        }
+        
+        # if force option is not enabled
         if ($force == 0){
-            if (!-d ".legit/commit/$latestCommit/$file"){
-                print "legit.pl: error: can not open '$file'\n";
-                exit 1;
+            # if curr dir == last commit
+            if ($cache == 0){
+                if (compare("$file", ".legit/commit/$latestCommit/$file") == 0){
+                    unlink "$file";
+                }
+                else{
+                    print "legit.pl: error: '$file' in current directory and 'commit $latestCommmit' are different\n";
+                }
             }
-            # if curr dir != last commit
-            
-            # if index != last commit
-
-
+            # if index == last commit
+            if (compare(".legit/index/$file", ".legit/commit/$latestCommit/$file") == 0){
+                unlink ".legit/index/$file";
+            }
+            else{
+                print "legit.pl: error: '$file' in index and 'commit $latestCommmit' are different\n";
+            }
         }
 
+        # force option enabled, no comparison
+        else {
+            unlink "$file" if ($cache == 0);
+            unlink ".legit/index/$file";
+        }
 
 
     }
