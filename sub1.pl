@@ -11,7 +11,7 @@ sub commit{
     # check for existence of -a flag
     my $aPos = -1;
     my $mPos = -1;
-    for (my $i=0; $i<$#args; $i++){
+    for (my $i=0; $i<$#args+1; $i++){
         $aPos = $i if ($args[$i] eq "-a");
         $mPos = $i if ($args[$i] eq "-m");
     }
@@ -40,7 +40,7 @@ sub commit{
     my $commitComment = $args[$mPos+1];
 
     # check if commit directory exists or not
-    if (!-e ".legit/commit"){
+    if (!-d ".legit/commit"){
         mkdir (".legit/commit", 0700);
     }
     
@@ -72,66 +72,136 @@ sub commit{
         exit 1;
     }
 
-    # add files from commit to list of files,
-    # do not push filename from 2nd list if already exist in first list
-    # remove all directory characters except the filename itself
-    if ($firstCommit == 0){
-        @filename2 = glob (".legit/commit/$latestCommit/*"); 
-        foreach my $commitItem (@filename2){
-            $commitItem =~ s/.legit\/commit\/$latestCommit\///;
-            push(@filename, $commitItem) unless grep{$_ ne $commitItem} @filename;
-        }
-    }
-    foreach my $item (@filename){
-        $item =~ s/.*\///;
-    }
-    
-
-    use File::Copy;
-    use File::Compare;
-    # case if this is the first commit
-    if ($firstCommit == 1){
-        mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
-        foreach my $item (@filename){
-            copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
-        }
-        print "Committed as commit 0\n";        
-    }
-    
-    else {
-        my $allSame = 1;
-        my @sameFiles;
-        foreach my $item (@filename){
-            # file appear in both index and latest commit
-            if (-e ".legit/index/$item" && -e ".legit/commit/$latestCommit/$item") {
-                # file are the same, copy from the latest commit to new commit
-                if (compare(".legit/commit/$latestCommit/$item", ".legit/index/$item") == 0){
-                    push (@sameFiles, "$item");
-                }
-                else {
-                    #file are not the same, copy from index
-                    mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
-                    copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
-                    $allSame = 0;
-                }
+    if ($aPos == -1){
+        print ">>>no -a flag\n";
+        # add files from commit to list of files,
+        # do not push filename from 2nd list if already exist in first list
+        # remove all directory characters except the filename itself
+        if ($firstCommit == 0){
+            @filename2 = glob (".legit/commit/$latestCommit/*"); 
+            foreach my $commitItem (@filename2){
+                $commitItem =~ s/.legit\/commit\/$latestCommit\///;
+                push(@filename, $commitItem) unless grep{$_ ne $commitItem} @filename;
             }
-            # file only appear in index but not latest commit
-            elsif (-e ".legit/index/$item" && !-e ".legit/commit/$latestCommit/$item") {
-                mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
+        }
+        foreach my $item (@filename){
+            $item =~ s/.*\///;
+        }
+        
+
+        use File::Copy;
+        use File::Compare;
+        # case if this is the first commit
+        if ($firstCommit == 1){
+            mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
+            foreach my $item (@filename){
                 copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
             }
+            print "Committed as commit 0\n";        
+        }
+        
+        else {
+            my $allSame = 1;
+            my @sameFiles;
+            foreach my $item (@filename){
+                # file appear in both index and latest commit
+                if (-e ".legit/index/$item" && -e ".legit/commit/$latestCommit/$item") {
+                    # file are the same, copy from the latest commit to new commit
+                    if (compare(".legit/commit/$latestCommit/$item", ".legit/index/$item") == 0){
+                        push (@sameFiles, "$item");
+                    }
+                    else {
+                        #file are not the same, copy from index
+                        mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
+                        copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                        $allSame = 0;
+                    }
+                }
+                # file only appear in index but not latest commit
+                elsif (-e ".legit/index/$item" && !-e ".legit/commit/$latestCommit/$item") {
+                    mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
+                    copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                }
+            }
+
+            if ($allSame == 0){
+                #copy the rest
+                foreach my $item (@sameFiles){
+                    copy(".legit/commit/$latestCommit/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                } 
+                print "Committed as commit $commitFileName\n";        
+            }
+            else {
+                print "nothing to commit\n";
+            }
+        }
+    }
+
+    # a flag present
+    else{ 
+        print ">>>yes -a flag\n";
+        foreach my $item (@filename){
+            $item =~ s/.*\///;
+            if (!-e "$item"){
+                print "legit.pl: error: '$item' not found in current directory\n";
+                next;
+            }
+            copy("$item", ".legit/index/$item") or die "copy fail\n";
         }
 
-        if ($allSame == 0){
-            #copy the rest
-            foreach my $item (@sameFiles){
-                copy(".legit/commit/$latestCommit/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
-            } 
-            print "Committed as commit $commitFileName\n";        
+        
+        # case if this is the first commit
+        if ($firstCommit == 1){
+            mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
+            foreach my $item (@filename){
+                copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+            }
+            print "Committed as commit 0\n";        
         }
+        
         else {
-            print "nothing to commit\n";
+            my $allSame = 1;
+            my @sameFiles;
+            foreach my $item (@filename){
+                # file appear in both index and latest commit
+                if (-e ".legit/index/$item" && -e ".legit/commit/$latestCommit/$item") {
+                    # file are the same, copy from the latest commit to new commit
+                    if (compare(".legit/commit/$latestCommit/$item", ".legit/index/$item") == 0){
+                        push (@sameFiles, "$item");
+                    }
+                    else {
+                        #file are not the same, copy from index
+                        mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
+                        copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                        $allSame = 0;
+                    }
+                }
+                # file only appear in index but not latest commit
+                elsif (-e ".legit/index/$item" && !-e ".legit/commit/$latestCommit/$item") {
+                    mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
+                    copy(".legit/index/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                }
+            }
+
+            if ($allSame == 0){
+                #copy the rest
+                foreach my $item (@sameFiles){
+                    copy(".legit/commit/$latestCommit/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
+                } 
+                print "Committed as commit $commitFileName\n";        
+            }
+            else {
+                print "nothing to commit\n";
+            }
+
         }
+        
+        
+        
+
+
+
+
     }
 
     #add comment
@@ -209,17 +279,7 @@ sub rm{
             unlink "$file" if ($cache == 0);
             unlink ".legit/index/$file";
         }
-
-
     }
-
-
-
-
-
-
-
-
 }
 
 
