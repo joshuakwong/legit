@@ -311,6 +311,7 @@ sub rm{
 
         # case 5
         elsif (($resA != 0) && ($resB != 0) && ($resC != 0)){
+            print "case5\n";
             if (!-e "$file" && !-e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
                 print "legit.pl: error: '$file' is not in the legit repository\n";
             }
@@ -328,6 +329,7 @@ sub rm{
             }
             elsif (!-e ".legit/index/$file"){
                 if ($force == 1){
+                    unlink "$file";
                     print "legit.pl: error: '$file' is not in the legit repository\n";
                 }
             }
