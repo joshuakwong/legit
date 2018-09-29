@@ -41,6 +41,19 @@ elsif ($ARGV[0] eq "rm"){
     rm(@ARGV);
 }
 
+elsif ($ARGV[0] eq "test"){
+    my @test;
+    push (@test, "a");
+    #push (@test, "b");
+    #push (@test, "c");
+    #push (@test, "d");
+    #push (@test, "e");
+    #if (grep(/^g$/, @test) != 1){
+    #    print "not found\n";
+    #}
+    print "$#test\n";
+}
+
 else {
     print "legit.pl: error: not recognized command\n";
     exit;

@@ -20,6 +20,7 @@ sub add{
         mkdir (".legit/index", 0700);
     }
 
+    use File::Copy;
     foreach my $file (@files){
         # catch files not in the current directory
         if ($file =~ /\//){
@@ -31,16 +32,20 @@ sub add{
             print "filename $file is not valid\n";
             next;
         }
+        # catch files that doesn't exist in directory but alread traced
+        if (!-e $file && -e ".legit/index/$file"){
+            unlink ".legit/index/$file";
+            next;
+        }
+ 
         # catch files that doesn't exist in directory
         if (!-e $file ){
             print "legit.pl: error: can not open '$file'\n";
             next;
         }
- 
+
         # copy files
-        use File::Copy;
         copy("$file", ".legit/index/$file") or die "copy fail";
-        #print "Backup of '$file' saved '.legit/index/$file'\n";        
     }
 }
 
