@@ -20,6 +20,10 @@ echo 2 >y
 echo "$ echo 3 >z"
 echo 3 >z
 
+echo "$ ./legit.pl add x y z"
+./legit.pl add x y z
+echo "$ ./legit.pl commit -m "first commit""
+./legit.pl commit -m "first commit"
 
 echo "$ echo 4 >x"
 echo 4 >x
