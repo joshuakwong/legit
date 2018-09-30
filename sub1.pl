@@ -223,6 +223,9 @@ sub commit{
                     copy("$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
                     $allSame = 0;
                 }
+                elsif (!-e "$file"){
+                    $allSame = 0;
+                }
             }
 
             if ($allSame == 0 || $fileDeleted == 1){
@@ -267,7 +270,8 @@ sub rm{
     $latestCommit = pop(@commitHist);
     $latestCommit =~ s/\.legit\/commit\///;
     if (!defined $latestCommit){
-        print "legit.pl: error: no previous commit history\n";
+        print "legit.pl: error: your repository does not have any commits yet\n";
+        #print "legit.pl: error: no previous commit history\n";
         exit 1;
     }
 
@@ -289,19 +293,45 @@ sub rm{
 
         # case 2
         elsif (($resA != 0) && ($resB != 0) && ($resC == 0)){
-            unlink "$file" if ($cache == 0 && $force == 1);
-            if (-e ".legit/index/$file"){
-                print "?????2\n";
+            if ($force == 1){
+
             }
-            else {
-                print "-----2\n";
-            }
+            #unlink "$file" if ($cache == 0 && $force == 1);
+            #if (-e ".legit/index/$file"){
+            #    if ($force == 0){
+            #        print "legit.pl: error: '$file' in index is different to both working file and repository\n";
+            #    }
+            #    else {
+            #        unlink ".legit/index/$file";
+            #    }
+            #}
+            #else {
+            #    print "legit.pl: error: '$file' is not in the legit repository\n";
+            #}
         }
 
         # case 3
         elsif (($resA == 0) && ($resB != 0) && ($resC != 0)){
-            if ($cache == 0){
-                print "legit.pl: error: '$file' has changes staged in the index\n";
+            #if ($cache == 0){
+            #    print "legit.pl: error: '$file' has changes staged in the index\n";
+            #}
+            if ($force == 1){
+                if ($cache == 0 && -e ".legit/index/$file"){
+                    unlink "$file";
+                }
+                else{
+                    next;
+                }
+                unlink ".legit/index/$file";
+            }
+            #&& !-e ".legit/commit/$latestCommit/$file"
+            else{
+                if ($cache == 1 ){
+                    unlink ".legit/index/$file";
+                }
+                else{
+                    print "legit.pl: error: '$file' has changes staged in the index\n";
+                }
             }
         }
 

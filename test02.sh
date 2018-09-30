@@ -22,7 +22,7 @@ echo world >b
 
 echo "$ ./legit.pl add a b c"
 ./legit.pl add a b c
-echo "$ ./legit.pl commit -m "first commit""
+echo "$ ./legit.pl commit -m \"first commit\""
 ./legit.pl commit -m "first commit"
 
 echo "$ ./legit.pl show :a"

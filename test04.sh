@@ -17,7 +17,7 @@ touch a b c d e f g
 
 echo "$ ./legit.pl add a b c e"
 ./legit.pl add a b c e
-echo "$ ./legit.pl commit -m "first commit""
+echo "$ ./legit.pl commit -m \"first commit\""
 ./legit.pl commit -m "first commit"
 echo "$ ./legit.pl add d g"
 ./legit.pl add d g

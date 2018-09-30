@@ -22,7 +22,7 @@ echo 3 >z
 
 echo "$ ./legit.pl add x y z"
 ./legit.pl add x y z
-echo "$ ./legit.pl commit -m "first commit""
+echo "$ ./legit.pl commit -m \"first commit\""
 ./legit.pl commit -m "first commit"
 
 echo "$ echo 4 >x"
