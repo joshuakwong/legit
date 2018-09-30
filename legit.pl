@@ -45,21 +45,18 @@ elsif ($ARGV[0] eq "status"){
     status();
 }
 
-elsif ($ARGV[0] eq "test"){
-    my @test;
-    push (@test, "a");
-    #push (@test, "b");
-    #push (@test, "c");
-    #push (@test, "d");
-    #push (@test, "e");
-    #if (grep(/^g$/, @test) != 1){
-    #    print "not found\n";
-    #}
-    print "$#test\n";
-}
-
 else {
-    print "legit.pl: error: not recognized command\n";
+    print "legit.pl: error: unknown command $ARGV[0]\n";
+    print "Usage: ./legit.pl <command> [<args>]\n";
+    print "\n";
+    print "These are the legit commands:\n";
+    print "\tinit\tCreate an empty legit repository\n";
+    print "\tadd\tAdd file contents to the index\n";
+    print "\tcommit\tRecord changes to the repository\n";
+    print "\tlog\tShow commit log\n";
+    print "\trm\tRemove files from the current directory and from the index\n";
+    print "\tstatus\tShow the status of files in the current directory, index, and repository\n";
+    print "\n";
     exit;
 }
 
