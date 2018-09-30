@@ -4,7 +4,7 @@
 # legit status 2
 
 
-echo "Test 04 - legit status 2"
+echo "Test 04 - legit status 2 (deleted files)"
 echo "--------------------------------------------------\n"
 
 echo "$ rm -rf .legit/"

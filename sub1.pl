@@ -391,18 +391,24 @@ sub status{
         my $resB = compare(".legit/index/$file", ".legit/commit/$latestCommit/$file");
         my $resC = compare(".legit/commit/$latestCommit/$file", "$file");
 
-        #print "$resA\t$resB\t$resC\n";
         if (!-e "$file" && !-e ".legit/index/$file" && -e ".legit/commit/$latestCommit/$file"){
             print "$file - deleted\n";
         }
 
-        if (!-e "$file" && -e ".legit/index/$file" && -e ".legit/commit/$latestCommit/$file"){
+        elsif (!-e "$file" && -e ".legit/index/$file" && -e ".legit/commit/$latestCommit/$file"){
             print "$file - file deleted\n";
         }
-        if (-e "$file" && !-e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
+        elsif (-e "$file" && !-e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
             print "$file - untracked\n";
         }
 
+        elsif (-e "$file" && !-e ".legit/index/$file" && -e ".legit/commit/$latestCommit/$file"){
+            print "$file - untracked\n";
+        }
+
+        elsif (!-e "$file" && -e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
+            print "$file - added to index\n";
+        }
         elsif (-e "$file" && -e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
             print "$file - added to index\n";
         }
@@ -420,28 +426,16 @@ sub status{
             elsif ($resA != 0 && $resB == 0 && $resC != 0){
                 print "$file - file changed, changes not staged for commit\n";
             }
+            elsif ($resA != 0 && $resB != 0 && $resC == 0){
+                print "$file - file changed, changes staged for commit\n";
+            }
         }
 
 
         elsif (-e "$file" && -e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
             print "$file - added to index\n";
         }
-
-
-
-
-
-
-
-
-
-
-
-
     }
-
-
-
 }
 
 1;
