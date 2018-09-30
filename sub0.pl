@@ -53,7 +53,7 @@ sub add{
 
 # legit show
 sub show{
-    #initcheck();
+    initcheck();
     my (@args) = @_;   
 
     #print $args[0];
@@ -115,7 +115,7 @@ sub show{
 
 # legit log
 sub legitlog{
-    #initcheck();
+    initcheck();
     if (!-e ".legit/commit"){
         print "legit.pl: error: no commit history.\n";
         exit 1;

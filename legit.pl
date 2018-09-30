@@ -41,6 +41,10 @@ elsif ($ARGV[0] eq "rm"){
     rm(@ARGV);
 }
 
+elsif ($ARGV[0] eq "status"){
+    status();
+}
+
 elsif ($ARGV[0] eq "test"){
     my @test;
     push (@test, "a");
