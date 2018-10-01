@@ -10,8 +10,8 @@ echo "--------------------------------------------------\n"
 
 echo "$ rm -rf .legit/"
 rm -rf .legit/
-echo "$ $1 init"
-$1 init
+echo "$ ./legit.pl init"
+./legit.pl init
 
 echo "$ echo 1 >a"
 echo 1 >a
@@ -22,10 +22,10 @@ echo 1 >e
 echo "$ echo 1 >f"
 echo 1 >f
 
-echo "$ $1 add a b e f"
-$1 add a b e f
-echo "$ $1 commit -m \"first commit\""
-$1 commit -m "first commit"
+echo "$ ./legit.pl add a b e f"
+./legit.pl add a b e f
+echo "$ ./legit.pl commit -m \"first commit\""
+./legit.pl commit -m "first commit"
 
 echo "$ echo 2 >a"
 echo 2 >a
@@ -40,8 +40,8 @@ rm b
 echo "$ rm f"
 rm f
 
-echo "$ $1 add a b c e f g"
-$1 add a b c e f g
+echo "$ ./legit.pl add a b c e f g"
+./legit.pl add a b c e f g
 
 
 echo "$ echo 3 >a"
@@ -55,14 +55,22 @@ echo 3 >g
 echo "$ rm c e"
 rm c e 
 
-$1 rm --force --cached a
-$1 rm --force --cached b
-$1 rm --force --cached c
-$1 rm --force --cached d
-$1 rm --force --cached e
-$1 rm --force --cached f
-$1 rm --force --cached g
+echo "$ ./legit.pl rm --force --cached a"
+./legit.pl rm --force --cached a
+echo "$ ./legit.pl rm --force --cached b"
+./legit.pl rm --force --cached b
+echo "$ ./legit.pl rm --force --cached c"
+./legit.pl rm --force --cached c
+echo "$ ./legit.pl rm --force --cached d"
+./legit.pl rm --force --cached d
+echo "$ ./legit.pl rm --force --cached e"
+./legit.pl rm --force --cached e
+echo "$ ./legit.pl rm --force --cached f"
+./legit.pl rm --force --cached f
+echo "$ ./legit.pl rm --force --cached g"
+./legit.pl rm --force --cached g
+#./legit.pl status 
 
-#$1 status 
+rm a d f g &2>/dev/null
 
 ###########################################################

@@ -336,7 +336,7 @@ sub rm{
         # case 3
         elsif (($resA == 0) && ($resB != 0) && ($resC != 0)){
             if ($force == 1){
-                if ($cache == 0 && !-e ".legit/commit/$latestCommit/$file"){
+                if ($cache == 0){
                     unlink "$file";
                 }
                 unlink ".legit/index/$file";

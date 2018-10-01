@@ -4,14 +4,14 @@
 # curr dir, index and commit all different files
 
 
-echo "test 08 - legit rm"
+echo "test 09 - legit rm"
 echo "          curr dir, index and commit all different files"
 echo "--------------------------------------------------\n"
 
 echo "$ rm -rf .legit/"
 rm -rf .legit/
-echo "$ $1 init"
-$1 init
+echo "$ ./legit.pl init"
+./legit.pl init
 
 echo "$ echo 1 >a"
 echo 1 >a
@@ -22,10 +22,10 @@ echo 1 >e
 echo "$ echo 1 >f"
 echo 1 >f
 
-echo "$ $1 add a b e f"
-$1 add a b e f
-echo "$ $1 commit -m \"first commit\""
-$1 commit -m "first commit"
+echo "$ ./legit.pl add a b e f"
+./legit.pl add a b e f
+echo "$ ./legit.pl commit -m \"first commit\""
+./legit.pl commit -m "first commit"
 
 echo "$ echo 2 >a"
 echo 2 >a
@@ -40,8 +40,8 @@ rm b
 echo "$ rm f"
 rm f
 
-echo "$ $1 add a b c e f g"
-$1 add a b c e f g
+echo "$ ./legit.pl add a b c e f g"
+./legit.pl add a b c e f g
 
 
 echo "$ echo 3 >a"
@@ -55,14 +55,24 @@ echo 3 >g
 echo "$ rm c e"
 rm c e 
 
-$1 rm a
-$1 rm b
-$1 rm c
-$1 rm d
-$1 rm e
-$1 rm f
-$1 rm g
+echo "$ ./legit.pl rm a"
+./legit.pl rm a
+echo "$ ./legit.pl rm b"
+./legit.pl rm b
+echo "$ ./legit.pl rm c"
+./legit.pl rm c
+echo "$ ./legit.pl rm d"
+./legit.pl rm d
+echo "$ ./legit.pl rm e"
+./legit.pl rm e
+echo "$ ./legit.pl rm f"
+./legit.pl rm f
+echo "$ ./legit.pl rm g"
+./legit.pl rm g
 
-#$1 status 
+#./legit.pl status 
+
+rm a d f g &2>/dev/null
+
 
 ###########################################################
