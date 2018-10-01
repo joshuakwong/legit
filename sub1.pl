@@ -335,25 +335,18 @@ sub rm{
 
         # case 3
         elsif (($resA == 0) && ($resB != 0) && ($resC != 0)){
-            #if ($cache == 0){
-            #    print "legit.pl: error: '$file' has changes staged in the index\n";
-            #}
             if ($force == 1){
-                if ($cache == 0 && -e ".legit/index/$file"){
+                if ($cache == 0 && !-e ".legit/commit/$latestCommit/$file"){
                     unlink "$file";
-                }
-                else{
-                    next;
                 }
                 unlink ".legit/index/$file";
             }
-            #&& !-e ".legit/commit/$latestCommit/$file"
             else{
-                if ($cache == 1 ){
-                    unlink ".legit/index/$file";
+                if ($cache == 0){
+                    print "legit.pl: error: '$file' has changes staged in the index\n";
                 }
                 else{
-                    print "legit.pl: error: '$file' has changes staged in the index\n";
+                    unlink ".legit/index/$file";
                 }
             }
         }
@@ -372,13 +365,6 @@ sub rm{
                     unlink ".legit/index/$file";
                 }
             }
-            #unlink ".legit/index/$file";
-            #if (-e "$file"){
-            #    print "legit.pl: error: '$file' in repository is different to working file\n";
-            #}
-            #else {
-            #    print "legit.pl: error: ?????4\n";
-            #}
         }
 
         # case 5
@@ -391,11 +377,10 @@ sub rm{
             elsif (!-e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
                 print "legit.pl: error: '$file' is not in the legit repository\n";
             }
-            ###########################need fix######################
+
             elsif (!-e "$file" && !-e ".legit/commit/$latestCommit/$file"){
-                print "legit.pl: error: ?????5\n";
+                unlink ".legit/index/$file";
             }
-            ###########################need fix######################
             
             elsif (!-e "$file" && !-e ".legit/index/$file"){
                 print "legit.pl: error: '$file' not found in index\n";
@@ -409,15 +394,24 @@ sub rm{
             }
 
             elsif (!-e ".legit/commit/$latestCommit/$file"){
-                print "legit.pl: error: +++++5\n";
+                if ($force == 1){
+                    unlink ".legit/index/$file";
+                    if ($cache == 0){
+                        unlink "$file";
+                    }
+                }
+                else{
+                    print "legit.pl: error: '$file' in index is different to both working file and repository\n";
+                }
             }
+
             elsif (-e "$file" && -e ".legit/index/$file" && -e ".legit/commit/$latestCommit/$file"){
                 if ($force == 0){
                     print "legit.pl: error: '$file' in index is different to both working file and repository\n";
                 }
                 else {
-                    unlink "$file";
                     unlink ".legit/index/$file";
+                    unlink "$file" if ($cache == 0);
                 }
             }
         }
