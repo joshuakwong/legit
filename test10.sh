@@ -243,4 +243,4 @@ echo "$ ./legit.pl rm f"
 ./legit.pl rm f
 
 ###########################################################
-# rm a b c &2>/dev/null
+rm a b c d e &2>/dev/null
