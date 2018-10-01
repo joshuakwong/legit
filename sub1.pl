@@ -294,20 +294,43 @@ sub rm{
         # case 2
         elsif (($resA != 0) && ($resB != 0) && ($resC == 0)){
             if ($force == 1){
-
+                if ($cache == 1){
+                    if (-e ".legit/index/$file"){
+                        unlink ".legit/index/$file";
+                    }
+                    else{
+                        print "legit.pl: error: '$file' is not in the legit repository\n";
+                    }
+                }
+                else {
+                    if (-e ".legit/index/$file"){
+                        unlink ".legit/index/$file";
+                        unlink "$file";
+                    }
+                    else{
+                        print "legit.pl: error: '$file' is not in the legit repository\n";
+                    }
+                }
             }
-            #unlink "$file" if ($cache == 0 && $force == 1);
-            #if (-e ".legit/index/$file"){
-            #    if ($force == 0){
-            #        print "legit.pl: error: '$file' in index is different to both working file and repository\n";
-            #    }
-            #    else {
-            #        unlink ".legit/index/$file";
-            #    }
-            #}
-            #else {
-            #    print "legit.pl: error: '$file' is not in the legit repository\n";
-            #}
+
+            else{
+                if ($cache == 1){
+                    if (-e ".legit/index/$file"){
+                        print "legit.pl: error: '$file' in index is different to both working file and repository\n";
+                    }
+                    else{
+                        print "legit.pl: error: '$file' is not in the legit repository\n";
+                    }
+                }
+                else {
+                    if (-e ".legit/index/$file"){
+                        print "legit.pl: error: '$file' in index is different to both working file and repository\n";
+                    }
+                    else{
+                        print "legit.pl: error: '$file' is not in the legit repository\n";
+                    }
+                }
+            }
         }
 
         # case 3
@@ -337,13 +360,25 @@ sub rm{
 
         # case 4
         elsif (($resA != 0) && ($resB == 0) && ($resC != 0)){
-            unlink ".legit/index/$file";
-            if (-e "$file"){
-                print "legit.pl: error: '$file' in repository is different to working file\n";
+            if ($force == 1){
+                unlink ".legit/index/$file";
+                unlink "$file" if (-e "$file" && $cache == 0);
             }
-            else {
-                print "legit.pl: error: ?????4\n";
+            else{
+                if (-e "$file" && $cache == 0){
+                    print "legit.pl: error: '$file' in repository is different to working file\n";
+                }
+                else{
+                    unlink ".legit/index/$file";
+                }
             }
+            #unlink ".legit/index/$file";
+            #if (-e "$file"){
+            #    print "legit.pl: error: '$file' in repository is different to working file\n";
+            #}
+            #else {
+            #    print "legit.pl: error: ?????4\n";
+            #}
         }
 
         # case 5
@@ -352,24 +387,27 @@ sub rm{
             if (!-e "$file" && !-e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
                 print "legit.pl: error: '$file' is not in the legit repository\n";
             }
+
             elsif (!-e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
                 print "legit.pl: error: '$file' is not in the legit repository\n";
             }
+            ###########################need fix######################
             elsif (!-e "$file" && !-e ".legit/commit/$latestCommit/$file"){
                 print "legit.pl: error: ?????5\n";
             }
-            #elsif (!-e "file" && !-e ".legit/index/$file"){
-            #    print "legit.pl: error: -----5\n";
-            #}
+            ###########################need fix######################
+            
+            elsif (!-e "$file" && !-e ".legit/index/$file"){
+                print "legit.pl: error: '$file' not found in index\n";
+            }
+
             elsif (!-e "$file"){
-                print "legit.pl: error: '$file' in index is different to both working file and repository\n";
+                unlink ".legit/index/$file";
             }
             elsif (!-e ".legit/index/$file"){
-                if ($force == 1){
-                    unlink "$file";
-                    print "legit.pl: error: '$file' is not in the legit repository\n";
-                }
+                print "legit.pl: error: '$file' is not in the legit repository\n";
             }
+
             elsif (!-e ".legit/commit/$latestCommit/$file"){
                 print "legit.pl: error: +++++5\n";
             }
