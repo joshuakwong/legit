@@ -15,3 +15,11 @@
 28/9/2018   0000    0200    coding          add code for commit -a flag
 30/9/2018   0000    0400    debugging       fix for commit, added edge case, pass autotest up to test 13
 30/9/2018   1000    1300    coding          rewrite legit status
+1/10/2018   0000    0200    debugging       update missing error message for legit rm
+1/10/2018   0200    0300    coding          testscript 01-03
+1/10/2018   1000    1200    coding          testscript 04-05
+1/10/2018   1400    1600    debugging       legit rm edge case update
+1/10/2018   1700    1900    debugging       legit rm edge case update
+1/10/2018   2000    2200    coding          testscript 05-10
+
+
