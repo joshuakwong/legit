@@ -383,7 +383,7 @@ sub rm{
             }
             
             elsif (!-e "$file" && !-e ".legit/index/$file"){
-                print "legit.pl: error: '$file' not found in index\n";
+                print "legit.pl: error: '$file' is not in the legit repository\n";
             }
 
             elsif (!-e "$file"){
