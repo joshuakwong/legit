@@ -63,6 +63,10 @@ sub show{
         exit 1;
     }
 
+    # parse the argument
+    # 2 scenarios
+    # - <commit num>:<file>
+    # - :<file>#
     $arg = $args[0];
     if ($arg =~ /^(\d+):(.+)$/){
         our $commitNum = $1;
@@ -80,6 +84,7 @@ sub show{
     }
     
     # commitNumber not supplied, get file from index
+    # open the file for reading and print the file
     if (!defined $commitNum){
         if (!-e ".legit/index/$filename"){
             print "legit.pl: error: '$filename' not found in index\n";
@@ -128,12 +133,15 @@ sub legitlog{
         exit 1;
     }
 
+    # for each item in the list of commit history,
+    # open the comment in respective files
+    # print the content in the file as well as the commit number#
     foreach $dir (reverse @commitHist){
         $dir =~ /(\d+)/;
         open my $f, "<", "$dir/comment" or die "fail to read comment";
         print "$1 ";
         while (my $line = <$f>){
-            print "$line";    
+            print "$line"; 
         }
         close $f;
         print "\n";
@@ -141,6 +149,8 @@ sub legitlog{
 }
 
 
+# helper function, initialization check
+# if not initialized, print error message
 sub initcheck{
     #legit not initialized
     if (!-d ".legit"){ 

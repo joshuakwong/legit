@@ -66,10 +66,15 @@ sub commit{
     }
 
     # check if there are files in .legit/index
+    # flag $emptyCommit used to indicate if the commit contains no files
+    # if ($empty commit)
+    #   get list of files from latest commit
+    #
     my @filename = glob (".legit/index/*");
     foreach my $item (@filename){
         $item =~ s/.*\///;
     }
+
     my $emptyCommit = 0;
     if (!@filename){
         $emptyCommit = 1;
@@ -89,7 +94,10 @@ sub commit{
         }
     }
 
+    
     my $fileDeleted = 0;
+    
+    # if the -a flag is not found
     if ($aPos == -1){
         # add files from commit to list of files,
         # do not push filename from 2nd list if already exist in first list
@@ -97,11 +105,9 @@ sub commit{
         if ($firstCommit == 0){
             @filename2 = glob (".legit/commit/$latestCommit/*"); 
             foreach my $commitItem (@filename2){
-                #$commitItem =~ s/.*\///;
                 $commitItem =~ s/.legit\/commit\/$latestCommit\///;
                 next if ($commitItem =~ /comment/);
                 if (grep (/^$commitItem$/, @filename) != 1){
-                    #print ">>> hit deleted item: $commitItem\n";
                     $fileDeleted = 1;
                 }
                 else{
@@ -109,8 +115,6 @@ sub commit{
                 }
             }
         }
-
-        
 
         use File::Copy;
         use File::Compare;
@@ -148,11 +152,9 @@ sub commit{
                 }
             }
 
-            #print "hit\t $allSame \t $fileDeleted\n";
             if ($allSame == 0 || $fileDeleted == 1){
                 #copy the rest
                 foreach my $item (@sameFiles){
-                    #print "$item\n";
                     mkdir (".legit/commit/$commitFileName", 0700) if (!-d ".legit/commit/$commitFileName");
                     copy(".legit/commit/$latestCommit/$item", ".legit/commit/$commitFileName/$item") or die "copy fail";
                 } 
@@ -166,16 +168,12 @@ sub commit{
 
     # a flag present
     else{ 
-        #print ">>>yes -a flag\n";
         if ($firstCommit == 0){
-            #print "not first commit\n";
             @filename2 = glob (".legit/commit/$latestCommit/*"); 
             foreach my $commitItem (@filename2){
                 $commitItem =~ s/.legit\/commit\/$latestCommit\///;
                 next if ($commitItem =~ /comment/);
-                #print "$commitItem\n";
                 if (grep (/^$commitItem$/, @filename) != 1){
-                    #print "file detected\n";
                     $fileDeleted = 1;
                 }
                 else{
@@ -199,13 +197,10 @@ sub commit{
             my $allSame = 1;
             my @sameFiles;
             foreach my $item (@filename){
-                #print ">>>file: $item\n";
                 # file appear in both index and latest commit
                 if (-e "$item" && -e ".legit/commit/$latestCommit/$item") {
-                    #print "both exists\n";
                     # file are the same, copy from the latest commit to new commit
                     if (compare(".legit/commit/$latestCommit/$item", "$item") == 0){
-                        #print "same file\n";
                         push (@sameFiles, "$item");
                     }
                     else {
@@ -242,8 +237,8 @@ sub commit{
         }
     }
     
-    COMMENT:
     #add comment
+    COMMENT:
     if (-d ".legit/commit/$commitFileName"){
         my $commentDir = ".legit/commit/$commitFileName/comment";
         open my $commentFile, ">", $commentDir, or die "fail to write comments\n";
@@ -252,10 +247,10 @@ sub commit{
     }
 }
 
-
+# legit rm [--force] [--cached] <file_1>..<file_n>
 sub rm{
-    my @argv = @_;
     initcheck();
+    my @argv = @_;
 
     my $force = 0;
     my $cache = 0;
@@ -266,23 +261,43 @@ sub rm{
         $cache = 1 if ($arg =~ /--cache/);
         push(@fileList, $arg) if ($arg !~ /^--/);
     }
+
+    # get the list of commit history
+    # then pop the last element to get the latest commit
+    # if $latestCommit is not defined, then this is the first commit
     my @commitHist = glob (".legit/commit/*");
     $latestCommit = pop(@commitHist);
     $latestCommit =~ s/\.legit\/commit\///;
     if (!defined $latestCommit){
         print "legit.pl: error: your repository does not have any commits yet\n";
-        #print "legit.pl: error: no previous commit history\n";
         exit 1;
     }
 
     use File::Compare;
     foreach my $file (@fileList){
-        my $resA = compare("$file", ".legit/index/$file");
-        my $resB = compare(".legit/index/$file", ".legit/commit/$latestCommit/$file");
-        my $resC = compare(".legit/commit/$latestCommit/$file", "$file");
+        # file comparison results
+        # $curIndComp is the comparison between $file in current directory and in index
+        # $indComComp is the comparison between $file in index and in latest commit
+        # $curComComp is the comparison between $file in current directory and in latest commit 
+        my $curIndComp = compare("$file", ".legit/index/$file");
+        my $indComComp = compare(".legit/index/$file", ".legit/commit/$latestCommit/$file");
+        my $curComComp = compare(".legit/commit/$latestCommit/$file", "$file");
+
+
+        # All cases will be formated as follow
+        # ------------------------------------
+        #     current   index   latest
+        #       dir             commit
+        # ------------------------------------
+        # e.g.   X        1        1   
+        # indicates file does not exit in current dir, and index and commit has the same ver
+        #
+        # e.g.   3        2        1
+        # indicates file exist in all dir, and are different versions
 
         # case 1
-        if (($resA == 0) && ($resB == 0) && ($resC == 0)){
+        # 1 1 1
+        if (($curIndComp == 0) && ($indComComp == 0) && ($curComComp == 0)){
             #print "hit\n";
             unlink ".legit/index/$file";
             #if ($cache == 0 && $force == 1){
@@ -292,7 +307,8 @@ sub rm{
         }
 
         # case 2
-        elsif (($resA != 0) && ($resB != 0) && ($resC == 0)){
+        # 1 2 1  or  1 X 1
+        elsif (($curIndComp != 0) && ($indComComp != 0) && ($curComComp == 0)){
             if ($force == 1){
                 if ($cache == 1){
                     if (-e ".legit/index/$file"){
@@ -334,7 +350,8 @@ sub rm{
         }
 
         # case 3
-        elsif (($resA == 0) && ($resB != 0) && ($resC != 0)){
+        # 2 2 1  OR  2 2 X
+        elsif (($curIndComp == 0) && ($indComComp != 0) && ($curComComp != 0)){
             if ($force == 1){
                 if ($cache == 0){
                     unlink "$file";
@@ -352,7 +369,8 @@ sub rm{
         }
 
         # case 4
-        elsif (($resA != 0) && ($resB == 0) && ($resC != 0)){
+        # 2 1 1  OR  X 1 1
+        elsif (($curIndComp != 0) && ($indComComp == 0) && ($curComComp != 0)){
             if ($force == 1){
                 unlink ".legit/index/$file";
                 unlink "$file" if (-e "$file" && $cache == 0);
@@ -368,31 +386,45 @@ sub rm{
         }
 
         # case 5
-        elsif (($resA != 0) && ($resB != 0) && ($resC != 0)){
-            #print "case5\n";
+        elsif (($curIndComp != 0) && ($indComComp != 0) && ($curComComp != 0)){
+            # case 5.0
+            # X X X
             if (!-e "$file" && !-e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
                 print "legit.pl: error: '$file' is not in the legit repository\n";
             }
 
+            #case 5.1
+            # 1 X X
             elsif (!-e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
                 print "legit.pl: error: '$file' is not in the legit repository\n";
             }
 
+            #case 5.2
+            # X 1 X
             elsif (!-e "$file" && !-e ".legit/commit/$latestCommit/$file"){
                 unlink ".legit/index/$file";
             }
             
+            #case 5.3
+            # X X 1
             elsif (!-e "$file" && !-e ".legit/index/$file"){
                 print "legit.pl: error: '$file' is not in the legit repository\n";
             }
 
+            #case 5.4
+            # X 2 1
             elsif (!-e "$file"){
                 unlink ".legit/index/$file";
             }
+            
+            #case 5.5
+            # 2 X 1
             elsif (!-e ".legit/index/$file"){
                 print "legit.pl: error: '$file' is not in the legit repository\n";
             }
 
+            #case 5.6
+            # 2 1 X
             elsif (!-e ".legit/commit/$latestCommit/$file"){
                 if ($force == 1){
                     unlink ".legit/index/$file";
@@ -405,6 +437,8 @@ sub rm{
                 }
             }
 
+            #case 5.7
+            # 3 2 1 
             elsif (-e "$file" && -e ".legit/index/$file" && -e ".legit/commit/$latestCommit/$file"){
                 if ($force == 0){
                     print "legit.pl: error: '$file' in index is different to both working file and repository\n";
@@ -419,7 +453,7 @@ sub rm{
 }
 
 
-
+# legit status
 sub status{
     initcheck();
 
@@ -449,51 +483,98 @@ sub status{
     }
 
     foreach my $file (sort @filename){
-        my $resA = compare("$file", ".legit/index/$file");
-        my $resB = compare(".legit/index/$file", ".legit/commit/$latestCommit/$file");
-        my $resC = compare(".legit/commit/$latestCommit/$file", "$file");
+        # file comparison results
+        # $curIndComp is the comparison between $file in current directory and in index
+        # $indComComp is the comparison between $file in index and in latest commit
+        # $curComComp is the comparison between $file in current directory and in latest commit 
+        my $curIndComp = compare("$file", ".legit/index/$file");
+        my $indComComp = compare(".legit/index/$file", ".legit/commit/$latestCommit/$file");
+        my $curComComp = compare(".legit/commit/$latestCommit/$file", "$file");
 
+        # All cases will be formated as follow
+        # ------------------------------------
+        #     current   index   latest
+        #       dir             commit
+        # ------------------------------------
+        # e.g.   X        1        1   
+        # indicates file does not exit in current dir, and index and commit has the same ver
+        #
+        # e.g.   3        2        1
+        # indicates file exist in all dir, and are different versions
+        
+        # case 1
+        # X X 1
         if (!-e "$file" && !-e ".legit/index/$file" && -e ".legit/commit/$latestCommit/$file"){
             print "$file - deleted\n";
         }
 
+        # case 2
+        # X 1 1
         elsif (!-e "$file" && -e ".legit/index/$file" && -e ".legit/commit/$latestCommit/$file"){
             print "$file - file deleted\n";
         }
+
+        # case 3
+        # 1 X X
         elsif (-e "$file" && !-e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
             print "$file - untracked\n";
         }
 
+        # case 4
+        # 1 X 1
         elsif (-e "$file" && !-e ".legit/index/$file" && -e ".legit/commit/$latestCommit/$file"){
             print "$file - untracked\n";
         }
 
+        # case 5
+        # X 1 X
         elsif (!-e "$file" && -e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
             print "$file - added to index\n";
         }
+
+        # case 6
+        # 1 1 X
         elsif (-e "$file" && -e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
             print "$file - added to index\n";
         }
 
+        # case 7
         elsif (-e "$file" && -e ".legit/index/$file" && -e ".legit/commit/$latestCommit/$file"){
-            if ($resA == 0 && $resB == 0 && $resC == 0){
+            # case 7.1 
+            # 1 1 1
+            if ($curIndComp == 0 && $indComComp == 0 && $curComComp == 0){
                 print "$file - same as repo\n";
             }
-            elsif ($resA != 0 && $resB != 0 && $resC != 0){
+            
+            # case 7.2 
+            # 3 2 1
+            elsif ($curIndComp != 0 && $indComComp != 0 && $curComComp != 0){
                 print "$file - file changed, different changes staged for commit\n";
             }
-            elsif ($resA == 0 && $resB != 0 && $resC != 0){
+
+            # case 7.3
+            # 2 2 1
+            elsif ($curIndComp == 0 && $indComComp != 0 && $curComComp != 0){
                 print "$file - file changed, changes staged for commit\n";
             }
-            elsif ($resA != 0 && $resB == 0 && $resC != 0){
+
+            # case 7.4
+            # 2 1 1
+            elsif ($curIndComp != 0 && $indComComp == 0 && $curComComp != 0){
                 print "$file - file changed, changes not staged for commit\n";
             }
-            elsif ($resA != 0 && $resB != 0 && $resC == 0){
+
+            # case 7.5
+            # 2 1 2
+            elsif ($curIndComp != 0 && $indComComp != 0 && $curComComp == 0){
                 print "$file - file changed, changes staged for commit\n";
             }
         }
 
+        
 
+        # case 8
+        # 1 1 X
         elsif (-e "$file" && -e ".legit/index/$file" && !-e ".legit/commit/$latestCommit/$file"){
             print "$file - added to index\n";
         }
