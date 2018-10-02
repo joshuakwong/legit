@@ -90,7 +90,7 @@ sub show{
             print "legit.pl: error: '$filename' not found in index\n";
             exit 1;
         }
-        open my $f, "<", ".legit/index/$filename" or print "fuck, file cannot be opened";
+        open my $f, "<", ".legit/index/$filename" or print "file cannot be opened";
 
         while (my $line = <$f>){
             print $line;
@@ -108,7 +108,7 @@ sub show{
             print "legit.pl: error: '$filename' not found in commit $commitNum\n";
             exit 1;
         }
-        open my $f, "<", ".legit/commit/$commitNum/$filename" or print "fuck, file cannot be opened";
+        open my $f, "<", ".legit/commit/$commitNum/$filename" or print "file cannot be opened";
 
         while (my $line = <$f>){
             print $line;
